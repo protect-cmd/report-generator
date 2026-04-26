@@ -1,3 +1,2 @@
 [phases.setup]
-nixPkgs = ["python311", "python311Packages.pip"]
-aptPkgs = ["libpango-1.0-0", "libpangoft2-1.0-0", "libpangocairo-1.0-0", "libcairo2", "libgdk-pixbuf2.0-0", "libglib2.0-0", "libffi8", "fontconfig", "libharfbuzz0b", "libfreetype6"]
+nixPkgs = ["python311", "python311Packages.pip", "pango", "cairo", "gdk-pixbuf", "glib", "libffi", "fontconfig", "harfbuzz", "freetype", "gobject-introspection"]
