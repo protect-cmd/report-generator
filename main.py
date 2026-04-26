@@ -1,0 +1,81 @@
+import logging
+import os
+import tempfile
+import traceback
+
+from dotenv import load_dotenv
+from fastapi import FastAPI, HTTPException
+from fastapi.responses import JSONResponse
+
+from models.intake_form import IntakeForm
+from services.drive_service import build_drive_service, create_client_folder, get_shareable_url, upload_pdf
+from services.ghl_service import add_contact_note, move_opportunity_stage
+from services.llm_service import generate_document
+from services.pdf_service import generate_pdf
+from utils.prompt_loader import load_prompt
+
+load_dotenv()
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
+app = FastAPI(title="Eviction Command Document Generator")
+
+
+@app.post("/generate")
+async def generate(form: IntakeForm):
+    form_data = form.model_dump()
+
+    # 1. Load prompt — 400 if state/notice_type not supported
+    try:
+        populated_prompt = load_prompt(form.state, form.notice_type, form_data)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+    # 2. Generate document via LLM — 500 if fails
+    try:
+        document_text = generate_document(populated_prompt)
+    except Exception:
+        logger.error("LLM generation failed:\n%s", traceback.format_exc())
+        raise HTTPException(status_code=500, detail="Document generation failed")
+
+    # 3. Convert to PDF — 500 if fails
+    try:
+        with tempfile.NamedTemporaryFile(suffix=".pdf", delete=False) as tmp:
+            pdf_path = tmp.name
+        generate_pdf(document_text, pdf_path)
+    except Exception:
+        logger.error("PDF generation failed:\n%s", traceback.format_exc())
+        raise HTTPException(status_code=500, detail="PDF generation failed")
+
+    # 4. Upload to Google Drive — 500 if fails, GHL not called
+    try:
+        drive_service = build_drive_service()
+        parent_folder_id = os.environ.get("GOOGLE_DRIVE_PARENT_FOLDER_ID")
+        folder_name = f"{form.contact_id}_{form.full_name}_{form.notice_type}"
+        client_folder_id = create_client_folder(drive_service, parent_folder_id, folder_name)
+        file_name = (
+            f"{form.notice_type.replace(' ', '_')}"
+            f"_{form.tenant_full_legal_name.replace(' ', '_')}.pdf"
+        )
+        file_id = upload_pdf(drive_service, pdf_path, client_folder_id, file_name)
+        drive_url = get_shareable_url(file_id)
+    except Exception:
+        logger.error("Drive upload failed:\n%s", traceback.format_exc())
+        raise HTTPException(status_code=500, detail="Drive upload failed")
+
+    # 5. Notify GHL — log warning and continue on failure (document is in Drive)
+    ghl_api_key = os.environ.get("GHL_API_KEY")
+    stage_id = os.environ.get("GHL_PENDING_REVIEW_STAGE_ID")
+
+    try:
+        move_opportunity_stage(ghl_api_key, form.opportunity_id, stage_id)
+    except Exception:
+        logger.warning("GHL stage move failed:\n%s", traceback.format_exc())
+
+    try:
+        add_contact_note(ghl_api_key, form.contact_id, drive_url, form.notice_type, form.state, form.county)
+    except Exception:
+        logger.warning("GHL note failed:\n%s", traceback.format_exc())
+
+    return JSONResponse({"status": "success", "drive_url": drive_url})
