@@ -26,7 +26,7 @@ A hosted Python microservice (Railway) that replaces Make.com for Eviction Comma
 | Framework | FastAPI | Single endpoint: `POST /generate` |
 | PDF Generation | WeasyPrint | Self-hosted, free. Switch to PDFShift if quality is unacceptable. |
 | AI Router | OpenRouter via OpenAI SDK | `base_url=https://openrouter.ai/api/v1` — model set by `OPENROUTER_MODEL` env var |
-| Storage | Google Drive API v3 | Service account auth (not OAuth) |
+| Storage | Google Drive API v3 | OAuth (refresh token + client ID/secret) |
 | Hosting | Railway | Nixpacks builder + system deps for WeasyPrint |
 | Config | python-dotenv | |
 
@@ -76,8 +76,10 @@ OPENROUTER_API_KEY=
 # Model examples: anthropic/claude-sonnet-4-5, openai/gpt-4o, google/gemini-pro-1.5
 OPENROUTER_MODEL=anthropic/claude-sonnet-4-5
 
-# Google Drive
-GOOGLE_DRIVE_CREDENTIALS_JSON=   # Base64-encoded service account JSON
+# Google Drive (OAuth)
+GOOGLE_CLIENT_ID=
+GOOGLE_CLIENT_SECRET=
+GOOGLE_OAUTH_REFRESH_TOKEN=
 GOOGLE_DRIVE_PARENT_FOLDER_ID=   # Root folder in Drive for all client docs
 
 # GHL
@@ -104,8 +106,8 @@ OpenRouter lets us swap models by changing one env var (`OPENROUTER_MODEL`) with
 ### WeasyPrint over PDFShift
 WeasyPrint is free and self-hosted. PDFShift is a paid external API. Start with WeasyPrint; switch if PDF rendering quality is unacceptable after testing.
 
-### Service account auth for Google Drive
-No OAuth flows or user login needed. Service account JSON stored as Base64 env var so Railway can hold it without file uploads.
+### OAuth for Google Drive
+Uses refresh token + client ID/secret stored as env vars. `GOOGLE_OAUTH_REFRESH_TOKEN` is a long-lived refresh token obtained once via OAuth consent flow.
 
 ### GHL: if GHL update fails, still return 200
 Document is already generated and in Drive. GHL note failure is non-critical — log it, don't fail the whole request.
