@@ -1,7 +1,5 @@
 import html as _html
 
-from weasyprint import HTML
-
 
 def generate_pdf(document_text: str, output_path: str) -> str:
     safe_text = _html.escape(document_text).replace("\n", "<br>")
@@ -38,5 +36,6 @@ def generate_pdf(document_text: str, output_path: str) -> str:
 </body>
 </html>"""
 
+    from weasyprint import HTML  # noqa: PLC0415
     HTML(string=html_content).write_pdf(output_path)
     return output_path

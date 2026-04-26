@@ -1,8 +1,7 @@
-import base64
-import json
 import os
 
-from google.oauth2 import service_account
+from google.auth.transport.requests import Request
+from google.oauth2.credentials import Credentials
 from googleapiclient.discovery import build
 from googleapiclient.http import MediaFileUpload
 
@@ -11,12 +10,16 @@ SCOPES = ["https://www.googleapis.com/auth/drive"]
 
 
 def build_drive_service():
-    encoded = os.environ["GOOGLE_DRIVE_CREDENTIALS_JSON"]
-    credentials_info = json.loads(base64.b64decode(encoded))
-    credentials = service_account.Credentials.from_service_account_info(
-        credentials_info, scopes=SCOPES
+    creds = Credentials(
+        token=None,
+        refresh_token=os.environ["GOOGLE_OAUTH_REFRESH_TOKEN"],
+        token_uri="https://oauth2.googleapis.com/token",
+        client_id=os.environ["GOOGLE_CLIENT_ID"],
+        client_secret=os.environ["GOOGLE_CLIENT_SECRET"],
+        scopes=SCOPES,
     )
-    return build("drive", "v3", credentials=credentials)
+    creds.refresh(Request())
+    return build("drive", "v3", credentials=creds)
 
 
 def create_client_folder(service, parent_folder_id: str, folder_name: str) -> str:

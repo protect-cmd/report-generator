@@ -3,6 +3,8 @@ import os
 import tempfile
 import traceback
 
+from pathlib import Path
+
 from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException
 from fastapi.responses import JSONResponse
@@ -14,7 +16,7 @@ from services.llm_service import generate_document
 from services.pdf_service import generate_pdf
 from utils.prompt_loader import load_prompt
 
-load_dotenv()
+load_dotenv(Path(__file__).parent / ".env", override=True)
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -61,12 +63,15 @@ async def generate(form: IntakeForm):
         )
         file_id = upload_pdf(drive_service, pdf_path, client_folder_id, file_name)
         drive_url = get_shareable_url(file_id)
-    except Exception:
-        logger.error("Drive upload failed:\n%s", traceback.format_exc())
-        raise HTTPException(status_code=500, detail="Drive upload failed")
+    except Exception as e:
+        print(f"\n=== DRIVE ERROR ===\n{traceback.format_exc()}\n===================\n", flush=True)
+        raise HTTPException(status_code=500, detail=f"Drive upload failed: {e}")
     finally:
         if pdf_path and os.path.exists(pdf_path):
-            os.unlink(pdf_path)
+            try:
+                os.unlink(pdf_path)
+            except OSError:
+                pass
 
     # 5. Notify GHL — log warning and continue on failure (document is in Drive)
     ghl_api_key = os.environ.get("GHL_API_KEY")
