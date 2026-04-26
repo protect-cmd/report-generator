@@ -1,6 +1,7 @@
 import httpx
 
 GHL_BASE_URL = "https://services.leadconnectorhq.com"
+GHL_TIMEOUT_SECONDS = 10.0
 
 
 def _auth_headers(api_key: str) -> dict:
@@ -13,7 +14,7 @@ def _auth_headers(api_key: str) -> dict:
 
 def move_opportunity_stage(api_key: str, opportunity_id: str, stage_id: str) -> None:
     url = f"{GHL_BASE_URL}/opportunities/{opportunity_id}"
-    response = httpx.put(url, headers=_auth_headers(api_key), json={"stageId": stage_id})
+    response = httpx.put(url, headers=_auth_headers(api_key), json={"stageId": stage_id}, timeout=GHL_TIMEOUT_SECONDS)
     response.raise_for_status()
 
 
@@ -33,5 +34,5 @@ def add_contact_note(
         f"State: {state}\n"
         f"County: {county}"
     )
-    response = httpx.post(url, headers=_auth_headers(api_key), json={"body": body})
+    response = httpx.post(url, headers=_auth_headers(api_key), json={"body": body}, timeout=GHL_TIMEOUT_SECONDS)
     response.raise_for_status()

@@ -1,7 +1,7 @@
 import pytest
 import httpx
 from unittest.mock import patch, MagicMock
-from services.ghl_service import move_opportunity_stage, add_contact_note
+from services.ghl_service import move_opportunity_stage, add_contact_note, GHL_TIMEOUT_SECONDS
 
 
 GHL_API_KEY = "test_api_key"
@@ -73,7 +73,7 @@ def test_add_contact_note_includes_drive_link_in_body():
     assert DRIVE_URL in call_json["body"]
 
 
-def test_add_contact_note_includes_state_and_county():
+def test_add_contact_note_includes_state_county_and_notice_type():
     with patch("services.ghl_service.httpx.post") as mock_post:
         mock_post.return_value = make_mock_response(200)
         add_contact_note(GHL_API_KEY, CONTACT_ID, DRIVE_URL, "3-Day Pay or Quit", "Georgia", "Fulton")
@@ -81,6 +81,20 @@ def test_add_contact_note_includes_state_and_county():
     call_json = mock_post.call_args.kwargs["json"]
     assert "Georgia" in call_json["body"]
     assert "Fulton" in call_json["body"]
+    assert "3-Day Pay or Quit" in call_json["body"]
+
+
+def test_http_calls_use_explicit_timeout():
+    with patch("services.ghl_service.httpx.put") as mock_put, \
+         patch("services.ghl_service.httpx.post") as mock_post:
+        mock_put.return_value = make_mock_response(200)
+        mock_post.return_value = make_mock_response(200)
+
+        move_opportunity_stage(GHL_API_KEY, OPPORTUNITY_ID, STAGE_ID)
+        add_contact_note(GHL_API_KEY, CONTACT_ID, DRIVE_URL, "3-Day Pay or Quit", "Georgia", "Fulton")
+
+    assert mock_put.call_args.kwargs["timeout"] == GHL_TIMEOUT_SECONDS
+    assert mock_post.call_args.kwargs["timeout"] == GHL_TIMEOUT_SECONDS
 
 
 def test_add_contact_note_calls_raise_for_status():
