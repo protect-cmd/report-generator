@@ -1,3 +1,4 @@
+import contextlib
 import pytest
 from unittest.mock import patch, MagicMock
 from fastapi.testclient import TestClient
@@ -60,11 +61,9 @@ def _full_success_patches():
 
 
 def test_generate_returns_200_on_success():
-    with _full_success_patches()[0], _full_success_patches()[1], \
-         _full_success_patches()[2], _full_success_patches()[3], \
-         _full_success_patches()[4], _full_success_patches()[5], \
-         _full_success_patches()[6], _full_success_patches()[7], \
-         _full_success_patches()[8], _full_success_patches()[9]:
+    with contextlib.ExitStack() as stack:
+        for p in _full_success_patches():
+            stack.enter_context(p)
         response = client.post("/generate", json=VALID_PAYLOAD)
 
     assert response.status_code == 200

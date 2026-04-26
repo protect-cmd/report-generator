@@ -40,6 +40,7 @@ async def generate(form: IntakeForm):
         raise HTTPException(status_code=500, detail="Document generation failed")
 
     # 3. Convert to PDF — 500 if fails
+    pdf_path = None
     try:
         with tempfile.NamedTemporaryFile(suffix=".pdf", delete=False) as tmp:
             pdf_path = tmp.name
@@ -63,6 +64,9 @@ async def generate(form: IntakeForm):
     except Exception:
         logger.error("Drive upload failed:\n%s", traceback.format_exc())
         raise HTTPException(status_code=500, detail="Drive upload failed")
+    finally:
+        if pdf_path and os.path.exists(pdf_path):
+            os.unlink(pdf_path)
 
     # 5. Notify GHL — log warning and continue on failure (document is in Drive)
     ghl_api_key = os.environ.get("GHL_API_KEY")
