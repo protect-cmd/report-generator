@@ -79,3 +79,23 @@ def test_generate_pdf_converts_newlines_to_br(tmp_path):
     assert "<br>" in captured_html["content"]
     assert "Line one" in captured_html["content"]
     assert "Line two" in captured_html["content"]
+
+
+def test_generate_pdf_escapes_html_metacharacters(tmp_path):
+    output_path = str(tmp_path / "output.pdf")
+    captured_html = {}
+
+    def capture_html(string):
+        captured_html["content"] = string
+        mock = MagicMock()
+        mock.write_pdf = MagicMock()
+        return mock
+
+    text_with_html = 'Tenant owes $500 <see attachment> & "Exhibit A"'
+    with patch("services.pdf_service.HTML", side_effect=capture_html):
+        generate_pdf(text_with_html, output_path)
+
+    assert "<see attachment>" not in captured_html["content"]
+    assert "&lt;see attachment&gt;" in captured_html["content"]
+    assert "&amp;" in captured_html["content"]
+    assert "&quot;" in captured_html["content"]
