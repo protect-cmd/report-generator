@@ -35,6 +35,23 @@ VALID_PAYLOAD = {
     "additional_notes": "",
 }
 
+REQUIRED_FIELDS = [
+    "contact_id", "opportunity_id", "full_name", "email", "phone",
+    "property_address", "city", "state", "county",
+    "tenant_full_legal_name", "notice_type",
+]
+
+EXPECTED_KEYS = {
+    "contact_id", "opportunity_id", "full_name", "email", "phone",
+    "best_time_to_reach", "property_address", "city", "state", "county",
+    "property_type", "tenant_full_legal_name", "additional_tenants",
+    "tenant_phone", "lease_start_date", "lease_end_date", "month_to_month",
+    "monthly_rent", "security_deposit", "notice_type", "reason_for_eviction",
+    "total_amount_owed", "date_rent_last_paid", "months_unpaid",
+    "describe_violation", "prior_notices", "prior_notices_description",
+    "rent_control", "additional_notes",
+}
+
 
 def test_valid_payload_parses():
     form = IntakeForm(**VALID_PAYLOAD)
@@ -44,27 +61,39 @@ def test_valid_payload_parses():
     assert form.monthly_rent == 1500
 
 
-def test_missing_required_field_raises():
+@pytest.mark.parametrize("field", REQUIRED_FIELDS)
+def test_missing_required_field_raises(field):
     payload = {**VALID_PAYLOAD}
-    del payload["contact_id"]
+    del payload[field]
     with pytest.raises(ValidationError):
         IntakeForm(**payload)
 
 
-def test_optional_fields_default_to_none_or_empty():
+def test_empty_string_optional_fields_become_none():
+    form = IntakeForm(**VALID_PAYLOAD)
+    # VALID_PAYLOAD has "" for these — validator should convert to None
+    assert form.additional_tenants is None
+    assert form.tenant_phone is None
+    assert form.lease_end_date is None
+    assert form.describe_violation is None
+    assert form.additional_notes is None
+
+
+def test_absent_optional_fields_default_to_none():
     payload = {**VALID_PAYLOAD}
     del payload["additional_tenants"]
     del payload["tenant_phone"]
-    del payload["describe_violation"]
-    del payload["additional_notes"]
     form = IntakeForm(**payload)
-    assert form.additional_tenants is None or form.additional_tenants == ""
-    assert form.tenant_phone is None or form.tenant_phone == ""
+    assert form.additional_tenants is None
+    assert form.tenant_phone is None
+
+
+def test_invalid_email_raises():
+    payload = {**VALID_PAYLOAD, "email": "not-an-email"}
+    with pytest.raises(ValidationError):
+        IntakeForm(**payload)
 
 
 def test_to_dict_returns_all_fields():
     form = IntakeForm(**VALID_PAYLOAD)
-    d = form.model_dump()
-    assert "full_name" in d
-    assert "tenant_full_legal_name" in d
-    assert "notice_type" in d
+    assert form.model_dump().keys() == EXPECTED_KEYS
