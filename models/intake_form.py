@@ -1,5 +1,14 @@
 from typing import Optional
-from pydantic import BaseModel, ConfigDict, EmailStr, field_validator
+from pydantic import BaseModel, ConfigDict, EmailStr, model_validator
+
+
+def _null_str(v):
+    """Return None if value is the literal string 'null', empty, or actual None."""
+    if v is None:
+        return None
+    if isinstance(v, str) and v.strip().lower() in ("null", ""):
+        return None
+    return v
 
 
 class IntakeForm(BaseModel):
@@ -7,14 +16,14 @@ class IntakeForm(BaseModel):
 
     # Required fields
     contact_id: str
-    opportunity_id: str
-    full_name: str
+    opportunity_id: Optional[str] = None
+    full_name: Optional[str] = None
     email: EmailStr
     phone: str
     property_address: str
     city: str
     state: str
-    county: str
+    county: Optional[str] = None
     tenant_full_legal_name: str
     notice_type: str
 
@@ -38,14 +47,50 @@ class IntakeForm(BaseModel):
     rent_control: Optional[str] = None
     additional_notes: Optional[str] = None
 
-    @field_validator(
-        "lease_start_date", "lease_end_date", "date_rent_last_paid",
-        "additional_tenants", "tenant_phone", "describe_violation",
-        "additional_notes", "prior_notices_description",
-        mode="before",
-    )
+    @model_validator(mode="before")
     @classmethod
-    def empty_str_to_none(cls, v):
-        if isinstance(v, str) and v.strip() == "":
-            return None
-        return v
+    def normalize_null_strings(cls, data):
+        """Convert GHL's literal 'null' strings to None before field validation."""
+        if not isinstance(data, dict):
+            return data
+        str_fields = {
+            "opportunity_id", "full_name", "county", "best_time_to_reach",
+            "property_type", "additional_tenants", "tenant_phone",
+            "lease_start_date", "lease_end_date", "reason_for_eviction",
+            "date_rent_last_paid", "describe_violation", "prior_notices",
+            "prior_notices_description", "rent_control", "additional_notes",
+        }
+        for field in str_fields:
+            if field in data:
+                data[field] = _null_str(data[field])
+
+        # Coerce numeric string fields; treat "null" as None
+        for field in ("monthly_rent", "security_deposit", "total_amount_owed"):
+            v = _null_str(data.get(field))
+            if v is not None:
+                try:
+                    data[field] = float(v)
+                except (ValueError, TypeError):
+                    data[field] = None
+            else:
+                data[field] = None
+
+        v = _null_str(data.get("months_unpaid"))
+        if v is not None:
+            try:
+                data["months_unpaid"] = int(float(v))
+            except (ValueError, TypeError):
+                data["months_unpaid"] = None
+        else:
+            data["months_unpaid"] = None
+
+        # month_to_month: GHL sends "null", "true", "false", or actual bool
+        v = _null_str(data.get("month_to_month"))
+        if v is None:
+            data["month_to_month"] = None
+        elif isinstance(v, bool):
+            pass
+        elif isinstance(v, str):
+            data["month_to_month"] = v.lower() in ("true", "1", "yes")
+
+        return data
