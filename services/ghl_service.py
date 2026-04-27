@@ -30,7 +30,8 @@ def move_opportunity_stage(api_key: str, opportunity_id: str, stage_id: str, pip
     if pipeline_id:
         body["pipelineId"] = pipeline_id
     response = httpx.put(url, headers=_auth_headers(api_key), json=body, timeout=GHL_TIMEOUT_SECONDS)
-    response.raise_for_status()
+    if not response.is_success:
+        raise ValueError(f"GHL {response.status_code} — body: {response.text}")
 
 
 def update_contact_custom_field(api_key: str, contact_id: str, field_key: str, value: str) -> None:
