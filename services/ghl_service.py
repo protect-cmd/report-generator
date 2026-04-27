@@ -18,6 +18,17 @@ def move_opportunity_stage(api_key: str, opportunity_id: str, stage_id: str) -> 
     response.raise_for_status()
 
 
+def update_contact_custom_field(api_key: str, contact_id: str, field_key: str, value: str) -> None:
+    url = f"{GHL_BASE_URL}/contacts/{contact_id}"
+    response = httpx.put(
+        url,
+        headers=_auth_headers(api_key),
+        json={"customFields": [{"key": field_key, "field_value": value}]},
+        timeout=GHL_TIMEOUT_SECONDS,
+    )
+    response.raise_for_status()
+
+
 def add_contact_note(
     api_key: str,
     contact_id: str,

@@ -9,9 +9,11 @@ from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException
 from fastapi.responses import JSONResponse
 
+from models.deliver_request import DeliverRequest
 from models.intake_form import IntakeForm
-from services.drive_service import build_drive_service, create_client_folder, get_shareable_url, upload_pdf
-from services.ghl_service import add_contact_note, move_opportunity_stage
+from services.drive_service import build_drive_service, create_client_folder, download_pdf, file_id_from_url, get_shareable_url, upload_pdf
+from services.email_service import send_client_delivery
+from services.ghl_service import add_contact_note, move_opportunity_stage, update_contact_custom_field
 from services.llm_service import generate_document
 from services.pdf_service import generate_pdf
 from utils.prompt_loader import load_prompt
@@ -27,6 +29,7 @@ app = FastAPI(title="Eviction Command Document Generator")
 @app.post("/generate")
 async def generate(form: IntakeForm):
     form_data = form.model_dump()
+    logger.info("Incoming form data: %s", form_data)
 
     # 1. Load prompt — 400 if state/notice_type not supported
     try:
@@ -75,14 +78,23 @@ async def generate(form: IntakeForm):
             except OSError:
                 pass
 
-    # 5. Notify GHL — log warning and continue on failure (document is in Drive)
+    # 5. Save Drive URL to GHL custom field so Workflow 3 can pass it to /deliver
     ghl_api_key = os.environ.get("GHL_API_KEY")
+    try:
+        update_contact_custom_field(ghl_api_key, form.contact_id, "drive_document_url", drive_url)
+    except Exception:
+        logger.warning("GHL custom field update failed:\n%s", traceback.format_exc())
+
+    # 6. Notify GHL — log warning and continue on failure (document is in Drive)
     stage_id = os.environ.get("GHL_PENDING_REVIEW_STAGE_ID")
 
-    try:
-        move_opportunity_stage(ghl_api_key, form.opportunity_id, stage_id)
-    except Exception:
-        logger.warning("GHL stage move failed:\n%s", traceback.format_exc())
+    if form.opportunity_id:
+        try:
+            move_opportunity_stage(ghl_api_key, form.opportunity_id, stage_id)
+        except Exception:
+            logger.warning("GHL stage move failed:\n%s", traceback.format_exc())
+    else:
+        logger.info("GHL stage move skipped — no opportunity_id")
 
     try:
         add_contact_note(ghl_api_key, form.contact_id, drive_url, form.notice_type, form.state, form.county)
@@ -90,3 +102,33 @@ async def generate(form: IntakeForm):
         logger.warning("GHL note failed:\n%s", traceback.format_exc())
 
     return JSONResponse({"status": "success", "drive_url": drive_url})
+
+
+@app.post("/deliver")
+async def deliver(req: DeliverRequest):
+    # 1. Download PDF from Drive
+    try:
+        drive_service = build_drive_service()
+        file_id = file_id_from_url(req.drive_url)
+        pdf_bytes = download_pdf(drive_service, file_id)
+    except Exception:
+        logger.error("Drive download failed:\n%s", traceback.format_exc())
+        raise HTTPException(status_code=500, detail="Failed to retrieve document from Drive")
+
+    # 2. Send client delivery email
+    pdf_filename = f"{req.notice_type.replace(' ', '_')}_{req.property_address.replace(' ', '_')}.pdf"
+    sent = send_client_delivery(
+        client_email=req.email,
+        client_name=req.full_name,
+        notice_type=req.notice_type,
+        state=req.state,
+        county=req.county,
+        property_address=req.property_address,
+        pdf_bytes=pdf_bytes,
+        pdf_filename=pdf_filename,
+    )
+    if not sent:
+        raise HTTPException(status_code=500, detail="Failed to send delivery email")
+
+    logger.info("Document delivered to %s for contact %s", req.email, req.contact_id)
+    return JSONResponse({"status": "delivered", "contact_id": req.contact_id})

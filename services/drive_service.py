@@ -1,9 +1,11 @@
+import io
 import os
+import re
 
 from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
 from googleapiclient.discovery import build
-from googleapiclient.http import MediaFileUpload
+from googleapiclient.http import MediaFileUpload, MediaIoBaseDownload
 
 
 SCOPES = ["https://www.googleapis.com/auth/drive"]
@@ -45,3 +47,20 @@ def upload_pdf(service, file_path: str, folder_id: str, file_name: str) -> str:
 
 def get_shareable_url(file_id: str) -> str:
     return f"https://drive.google.com/file/d/{file_id}/view?usp=sharing"
+
+
+def file_id_from_url(drive_url: str) -> str:
+    match = re.search(r"/file/d/([^/]+)", drive_url)
+    if not match:
+        raise ValueError(f"Could not extract file ID from Drive URL: {drive_url}")
+    return match.group(1)
+
+
+def download_pdf(service, file_id: str) -> bytes:
+    request = service.files().get_media(fileId=file_id)
+    buffer = io.BytesIO()
+    downloader = MediaIoBaseDownload(buffer, request)
+    done = False
+    while not done:
+        _, done = downloader.next_chunk()
+    return buffer.getvalue()
