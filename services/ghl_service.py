@@ -13,24 +13,28 @@ def _auth_headers(api_key: str) -> dict:
 
 
 
-def move_opportunity_stage(
-    api_key: str,
-    contact_id: str,
-    pipeline_id: str,
-    stage_id: str,
-    location_id: str,
-) -> None:
-    url = f"{GHL_BASE_URL}/opportunities/upsert"
-    body = {
-        "contactId": contact_id,
-        "pipelineId": pipeline_id,
-        "stageId": stage_id,
-        "locationId": location_id,
-    }
-    response = httpx.post(url, headers=_auth_headers(api_key), json=body, timeout=GHL_TIMEOUT_SECONDS)
+def get_opportunity_id(api_key: str, contact_id: str, location_id: str) -> str:
+    url = f"{GHL_BASE_URL}/opportunities/search"
+    params = {"contact_id": contact_id, "location_id": location_id}
+    response = httpx.get(url, headers=_auth_headers(api_key), params=params, timeout=GHL_TIMEOUT_SECONDS)
+    response.raise_for_status()
+    opportunities = response.json().get("opportunities", [])
+    if not opportunities:
+        raise ValueError(f"No opportunity found for contact {contact_id}")
+    return opportunities[0]["id"]
+
+
+def move_opportunity_stage(api_key: str, opportunity_id: str, stage_id: str) -> None:
+    url = f"{GHL_BASE_URL}/opportunities/{opportunity_id}"
+    response = httpx.put(
+        url,
+        headers=_auth_headers(api_key),
+        json={"pipelineStageId": stage_id},
+        timeout=GHL_TIMEOUT_SECONDS,
+    )
     if not response.is_success:
         import logging
-        logging.getLogger(__name__).error("GHL upsert — status=%s body=%s", response.status_code, response.text)
+        logging.getLogger(__name__).error("GHL stage move — status=%s body=%s", response.status_code, response.text)
         raise ValueError(f"GHL {response.status_code}")
 
 
