@@ -24,7 +24,7 @@ def move_opportunity_stage(
     body = {
         "contactId": contact_id,
         "pipelineId": pipeline_id,
-        "pipelineStageId": stage_id,
+        "stageId": stage_id,
         "locationId": location_id,
     }
     response = httpx.post(url, headers=_auth_headers(api_key), json=body, timeout=GHL_TIMEOUT_SECONDS)
