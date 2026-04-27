@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<style>
+  @page {
+    size: letter;
+    margin: 0;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: 11pt;
+    line-height: 1.85;
+    color: #1a1a1a;
+    background: #fff;
+    orphans: 3;
+    widows: 3;
+  }
+
+  .doc-header {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    height: 60px;
+    background: #0A1628;
+    border-bottom: 3px solid #C89B3C;
+    padding: 0 56px;
+    overflow: hidden;
+  }
+
+  .doc-header-logo {
+    float: left;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 15.5pt;
+    font-weight: 700;
+    color: #fff;
+    line-height: 60px;
+    letter-spacing: 0.2px;
+  }
+
+  .doc-header-logo span { color: #C89B3C; }
+
+  .doc-header-meta {
+    float: right;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 7pt;
+    color: rgba(255,255,255,0.4);
+    text-transform: uppercase;
+    letter-spacing: 0.9px;
+    line-height: 1.55;
+    text-align: right;
+    padding-top: 13px;
+  }
+
+  .doc-footer {
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    height: 40px;
+    background: #0A1628;
+    border-top: 2px solid #C89B3C;
+    padding: 0 56px;
+    overflow: hidden;
+  }
+
+  .doc-footer-brand {
+    float: left;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 8.5pt;
+    font-weight: 700;
+    color: #C89B3C;
+    line-height: 40px;
+  }
+
+  .doc-footer-contact {
+    float: right;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 8pt;
+    color: rgba(255,255,255,0.4);
+    line-height: 40px;
+  }
+
+  .doc-body {
+    padding: 80px 56px 80px;
+  }
+
+  /* ── Title block ── */
+  .title-block {
+    text-align: center;
+    margin-bottom: 28px;
+    break-inside: avoid;
+  }
+
+  .title-block h1 {
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: 13pt;
+    font-weight: 700;
+    color: #0A1628;
+    letter-spacing: 0.3px;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+  }
+
+  .title-block .statute {
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 9pt;
+    color: #555;
+  }
+
+  /* ── Info blocks ── */
+  .info-section {
+    margin: 22px 0;
+    break-inside: avoid;
+  }
+
+  .info-label {
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 7.5pt;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1.1px;
+    color: #0A1628;
+    border-bottom: 1px solid #d8d0bc;
+    padding-bottom: 3px;
+    margin-bottom: 8px;
+  }
+
+  .info-row {
+    font-size: 10.5pt;
+    line-height: 1.7;
+  }
+
+  /* ── Body paragraphs ── */
+  .body-section {
+    margin: 28px 0;
+  }
+
+  .body-para {
+    font-size: 11pt;
+    line-height: 1.85;
+    margin-bottom: 16px;
+    text-align: justify;
+    break-inside: avoid;
+  }
+
+  /* ── Amount callout ── */
+  .amount-callout {
+    margin: 28px 0;
+    padding: 16px 22px;
+    background: #f8f6f1;
+    border-left: 4px solid #C89B3C;
+    break-inside: avoid;
+  }
+
+  .amount-callout .section-heading {
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 8pt;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    color: #0A1628;
+    margin-bottom: 10px;
+  }
+
+  .amount-total {
+    font-size: 12pt;
+    font-weight: 700;
+    color: #0A1628;
+    margin-bottom: 10px;
+  }
+
+  .itemized-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 10pt;
+    margin-top: 8px;
+  }
+
+  .itemized-table tr {
+    break-inside: avoid;
+  }
+
+  .itemized-table td {
+    padding: 4px 0;
+    border-bottom: 1px solid #e8e0d0;
+  }
+
+  .itemized-table td:last-child {
+    text-align: right;
+    font-weight: 700;
+  }
+
+  /* ── Deadline ── */
+  .deadline-block {
+    margin: 24px 0;
+    padding: 14px 22px;
+    background: #f0f4f8;
+    border: 1px solid #c4d0dc;
+    font-size: 10.5pt;
+    line-height: 1.7;
+    break-inside: avoid;
+  }
+
+  .deadline-block strong {
+    color: #0A1628;
+  }
+
+  /* ── Signature block ── */
+  .signature-block {
+    margin-top: 40px;
+    font-size: 10.5pt;
+    line-height: 1.9;
+    break-inside: avoid;
+  }
+
+  .sig-line {
+    margin-top: 36px;
+    border-top: 1px solid #555;
+    width: 260px;
+    padding-top: 4px;
+    font-size: 9.5pt;
+    color: #333;
+  }
+
+  hr.divider {
+    border: none;
+    border-top: 1px solid #d8d0bc;
+    margin: 32px 0;
+  }
+
+  /* ── Serving instructions ── */
+  .serving-box {
+    margin: 20px 0 0;
+    padding: 18px 22px;
+    background: #f0f4f8;
+    border: 1px solid #c4d0dc;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 9.5pt;
+    line-height: 1.75;
+    color: #1a2a3a;
+    white-space: pre-line;
+  }
+
+  .serving-label {
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 7.5pt;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1.3px;
+    color: #0A1628;
+    border-bottom: 2px solid #C89B3C;
+    padding-bottom: 6px;
+    margin-bottom: 14px;
+    break-after: avoid;
+  }
+
+  /* ── Disclaimer ── */
+  .disclaimer-box {
+    margin: 32px 0 20px;
+    padding: 14px 18px;
+    background: #f8f6f1;
+    border-left: 3px solid #C89B3C;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 8.5pt;
+    line-height: 1.65;
+    color: #555;
+    break-inside: avoid;
+  }
+</style>
+</head>
+<body>
+
+  <div class="doc-header">
+    <div class="doc-header-logo">Eviction<span>Command</span></div>
+    <div class="doc-header-meta">Document Preparation Service<br>Attorney-Reviewed · County-Specific</div>
+  </div>
+
+  <div class="doc-footer">
+    <div class="doc-footer-brand">EvictionCommand.com</div>
+    <div class="doc-footer-contact">(888) 322-4034 · alex@evictioncommand.com</div>
+  </div>
+
+  <div class="doc-body">
+
+    <!-- Title -->
+    <div class="title-block">
+      <h1>Three (3)-Day Notice to Pay or Vacate</h1>
+      <div class="statute">O.C.G.A. § 44-7-50(c), as amended by 2024 Ga. Laws Act 392 (HB 404)</div>
+    </div>
+
+    <!-- Date -->
+    <div class="info-section">
+      <div class="info-label">Date of Notice</div>
+      <div class="info-row">April 27, 2026</div>
+    </div>
+
+    <!-- Landlord -->
+    <div class="info-section">
+      <div class="info-label">Landlord</div>
+      <div class="info-row">
+        Zeann Co<br>
+        123 Main St, Atlanta, Georgia 30301
+      </div>
+    </div>
+
+    <!-- Tenant -->
+    <div class="info-section">
+      <div class="info-label">Tenant(s)</div>
+      <div class="info-row">
+        Chris Movado, Maria Movado
+      </div>
+    </div>
+
+    <!-- Property -->
+    <div class="info-section">
+      <div class="info-label">Rental Property Address</div>
+      <div class="info-row">123 Main St, Atlanta, Fulton County, Georgia 30301</div>
+    </div>
+
+    <!-- Body paragraphs -->
+    <div class="body-section">
+      
+      <p class="body-para">NOTICE IS HEREBY GIVEN to Chris Movado and Maria Movado that you are currently in default of the lease agreement governing the above-referenced premises due to your failure to pay rent when due. Pursuant to O.C.G.A. § 44-7-50(c), as amended by 2024 Ga. Laws Act 392, you are hereby served with this formal demand to either pay the full amount outstanding or vacate and surrender possession of the leased property.</p>
+      
+      <p class="body-para">The total amount currently past due and owing as of the date of this notice is FOUR THOUSAND DOLLARS AND ZERO CENTS ($4,000.00), representing two (2) months of unpaid rent at $2,000.00 per month. You are required to pay this amount in full or vacate the premises within THREE (3) BUSINESS DAYS from the date of this notice, excluding Saturdays, Sundays, and state legal holidays.</p>
+      
+      <p class="body-para">If you fail to pay the full amount owed or vacate the premises by the deadline stated above, the Landlord will proceed to file a Dispossessory Affidavit at the Magistrate Court in Fulton County, Georgia, and pursue all legal remedies available under Georgia law.</p>
+      
+    </div>
+
+    <!-- Amount callout -->
+    <div class="amount-callout">
+      <div class="section-heading">Notice of Pay or Vacate</div>
+      <div class="amount-total">Total Amount Due: $4,000.00</div>
+      <div>(FOUR THOUSAND DOLLARS AND ZERO CENTS)</div>
+      
+      <table class="itemized-table">
+        
+        <tr>
+          <td>Past Due Rent — March 2026</td>
+          <td>$2,000.00</td>
+        </tr>
+        
+        <tr>
+          <td>Past Due Rent — April 2026</td>
+          <td>$2,000.00</td>
+        </tr>
+        
+      </table>
+      
+    </div>
+
+    <!-- Deadline -->
+    <div class="deadline-block">
+      <strong>Pay or Vacate Deadline: Thursday, May 1, 2026</strong><br>
+      You must pay the full amount owed or vacate and surrender possession of the premises by the above date.
+      Failure to comply will result in eviction proceedings.
+    </div>
+
+    <!-- Signature -->
+    <div class="signature-block">
+      Respectfully,<br><br>
+      Zeann Co<br>
+      123 Main St, Atlanta, Georgia 30301
+      <div class="sig-line">Landlord / Authorized Agent Signature &amp; Date</div>
+    </div>
+
+    <hr class="divider">
+
+    <!-- Disclaimer (fixed — same for all states) -->
+    <div class="disclaimer-box">
+      <strong>IMPORTANT NOTICE:</strong> This document was prepared by Eviction Command, a document
+      preparation service only. Eviction Command is not a law firm and does not provide legal advice.
+      This document should be reviewed by a licensed attorney before serving. Eviction Command is not
+      responsible for errors resulting from inaccurate information provided by the client.
+    </div>
+
+    <!-- Serving instructions (state-specific, from LLM) -->
+    <div class="serving-box">
+      <div class="serving-label">Serving Instructions</div>
+      HOW TO SERVE THIS NOTICE IN GEORGIA (O.C.G.A. § 44-7-50(d)):
+
+Step 1: Print two (2) copies of this notice — one for the tenant and one for your records.
+
+Step 2: Place the tenant&#39;s copy inside a sealed envelope. Do NOT leave the notice unsealed or folded and taped to the door. The statute requires a sealed envelope.
+
+Step 3: Post the sealed envelope conspicuously on the front door of the rental property. &#34;Conspicuously&#34; means it must be clearly visible — eye level on the door is recommended. Do not slide it under the door or leave it in a mailbox.
+
+Step 4: If your lease agreement specifies additional delivery methods (e.g., certified mail or email), you MUST also deliver the notice by those additional methods on the same day.
+
+Step 5: Document your service immediately. Take a dated photograph of the envelope posted on the door. Note the date and time of posting in writing.
+
+Step 6: Keep your copy of the notice and all documentation of service. You will need proof of service if you proceed to file a Dispossessory Affidavit.
+
+Step 7: Count THREE (3) BUSINESS DAYS from the date of posting (excluding Saturdays, Sundays, and federal holidays). If the tenant does not pay or vacate by the deadline, you may proceed to file a Dispossessory Affidavit at the Magistrate Court in the county where the property is located.
+
+IMPORTANT: Do not accept partial payment after serving this notice unless you intend to abandon the eviction. Consult an attorney before accepting any payment after this notice is served.
+    </div>
+
+  </div>
+
+</body>
+</html>

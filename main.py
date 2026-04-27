@@ -36,17 +36,19 @@ async def generate(form: IntakeForm):
 
     # 2. Generate document via LLM — 500 if fails
     try:
-        document_text = generate_document(populated_prompt)
+        document_data = generate_document(populated_prompt)
     except Exception:
         logger.error("LLM generation failed:\n%s", traceback.format_exc())
         raise HTTPException(status_code=500, detail="Document generation failed")
 
     # 3. Convert to PDF — 500 if fails
+    from utils.prompt_loader import NOTICE_TYPE_MAP  # noqa: PLC0415
+    notice_key = NOTICE_TYPE_MAP.get(form.notice_type, "3day")
     pdf_path = None
     try:
         with tempfile.NamedTemporaryFile(suffix=".pdf", delete=False) as tmp:
             pdf_path = tmp.name
-        generate_pdf(document_text, pdf_path)
+        generate_pdf(document_data, pdf_path, notice_key)
     except Exception:
         logger.error("PDF generation failed:\n%s", traceback.format_exc())
         raise HTTPException(status_code=500, detail="PDF generation failed")

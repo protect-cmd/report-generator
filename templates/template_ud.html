@@ -1,0 +1,824 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<style>
+  @page { size: letter; margin: 0; }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: 11pt;
+    line-height: 1.85;
+    color: #1a1a1a;
+    background: #fff;
+    orphans: 3;
+    widows: 3;
+  }
+
+  .doc-header {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    height: 60px;
+    background: #0A1628;
+    border-bottom: 3px solid #C89B3C;
+    padding: 0 56px;
+    overflow: hidden;
+  }
+
+  .doc-header-logo {
+    float: left;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 15.5pt;
+    font-weight: 700;
+    color: #fff;
+    line-height: 60px;
+    letter-spacing: 0.2px;
+  }
+
+  .doc-header-logo span { color: #C89B3C; }
+
+  .doc-header-meta {
+    float: right;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 7pt;
+    color: rgba(255,255,255,0.4);
+    text-transform: uppercase;
+    letter-spacing: 0.9px;
+    line-height: 1.55;
+    text-align: right;
+    padding-top: 13px;
+  }
+
+  .doc-footer {
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    height: 40px;
+    background: #0A1628;
+    border-top: 2px solid #C89B3C;
+    padding: 0 56px;
+    overflow: hidden;
+  }
+
+  .doc-footer-brand {
+    float: left;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 8.5pt;
+    font-weight: 700;
+    color: #C89B3C;
+    line-height: 40px;
+  }
+
+  .doc-footer-contact {
+    float: right;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 8pt;
+    color: rgba(255,255,255,0.4);
+    line-height: 40px;
+  }
+
+  .doc-body {
+    padding: 80px 56px 80px;
+  }
+
+  /* ── Cover sheet ── */
+  .cover-sheet {
+    break-inside: avoid;
+    margin-bottom: 36px;
+  }
+
+  .cover-title {
+    text-align: center;
+    margin-bottom: 20px;
+  }
+
+  .cover-title h1 {
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: 13pt;
+    font-weight: 700;
+    color: #0A1628;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    margin-bottom: 4px;
+  }
+
+  .cover-title .subtitle {
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 9pt;
+    color: #555;
+  }
+
+  .cover-meta {
+    margin-top: 20px;
+    padding: 14px 18px;
+    background: #f8f6f1;
+    border-left: 4px solid #C89B3C;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 9.5pt;
+    line-height: 1.75;
+    break-inside: avoid;
+  }
+
+  .cover-meta-row {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 4px;
+  }
+
+  .cover-meta-label {
+    font-weight: 700;
+    color: #0A1628;
+    min-width: 160px;
+    flex-shrink: 0;
+  }
+
+  .doc-toc {
+    margin-top: 20px;
+    padding: 14px 18px;
+    background: #0A1628;
+    color: #fff;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 9pt;
+    line-height: 1.9;
+    break-inside: avoid;
+  }
+
+  .doc-toc-label {
+    font-size: 7.5pt;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    color: #C89B3C;
+    margin-bottom: 8px;
+  }
+
+  .doc-toc ol {
+    margin-left: 18px;
+  }
+
+  /* ── Document separator ── */
+  .doc-separator {
+    break-before: page;
+  }
+
+  .doc-separator-bar {
+    background: #0A1628;
+    color: #C89B3C;
+    padding: 10px 22px;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 7.5pt;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    margin-bottom: 28px;
+    break-inside: avoid;
+    break-after: avoid;
+  }
+
+  /* ── Shared section styles ── */
+  .title-block {
+    text-align: center;
+    margin-bottom: 28px;
+    break-inside: avoid;
+  }
+
+  .title-block h2 {
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: 12.5pt;
+    font-weight: 700;
+    color: #0A1628;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    margin-bottom: 4px;
+  }
+
+  .title-block .statute {
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 9pt;
+    color: #555;
+  }
+
+  .info-section {
+    margin: 22px 0;
+    break-inside: avoid;
+  }
+
+  .info-label {
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 7.5pt;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1.1px;
+    color: #0A1628;
+    border-bottom: 1px solid #d8d0bc;
+    padding-bottom: 3px;
+    margin-bottom: 8px;
+  }
+
+  .info-row {
+    font-size: 10.5pt;
+    line-height: 1.7;
+  }
+
+  .body-section { margin: 28px 0; }
+
+  .body-para {
+    font-size: 11pt;
+    line-height: 1.85;
+    margin-bottom: 16px;
+    text-align: justify;
+    break-inside: avoid;
+  }
+
+  /* ── Amount callout (reused from 3day) ── */
+  .amount-callout {
+    margin: 28px 0;
+    padding: 16px 22px;
+    background: #f8f6f1;
+    border-left: 4px solid #C89B3C;
+    break-inside: avoid;
+  }
+
+  .amount-callout .section-heading {
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 8pt;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    color: #0A1628;
+    margin-bottom: 10px;
+  }
+
+  .amount-total {
+    font-size: 12pt;
+    font-weight: 700;
+    color: #0A1628;
+    margin-bottom: 10px;
+  }
+
+  .itemized-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 10pt;
+    margin-top: 8px;
+  }
+
+  .itemized-table tr { break-inside: avoid; }
+
+  .itemized-table td {
+    padding: 4px 0;
+    border-bottom: 1px solid #e8e0d0;
+  }
+
+  .itemized-table td:last-child {
+    text-align: right;
+    font-weight: 700;
+  }
+
+  /* ── Deadline block ── */
+  .deadline-block {
+    margin: 24px 0;
+    padding: 14px 22px;
+    background: #f0f4f8;
+    border: 1px solid #c4d0dc;
+    font-size: 10.5pt;
+    line-height: 1.7;
+    break-inside: avoid;
+  }
+
+  .deadline-block strong { color: #0A1628; }
+
+  /* ── Affidavit styles ── */
+  .affidavit-intro {
+    font-size: 10pt;
+    line-height: 1.8;
+    margin-bottom: 20px;
+    break-inside: avoid;
+  }
+
+  .affidavit-field {
+    margin: 16px 0;
+    break-inside: avoid;
+  }
+
+  .affidavit-field-label {
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 8pt;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: #0A1628;
+    margin-bottom: 4px;
+  }
+
+  .affidavit-field-value {
+    font-size: 10.5pt;
+    padding: 6px 10px;
+    border-bottom: 1px solid #555;
+    min-height: 28px;
+    line-height: 1.6;
+  }
+
+  .grounds-list {
+    margin: 16px 0;
+    padding-left: 20px;
+    break-inside: avoid;
+  }
+
+  .grounds-list li {
+    font-size: 10.5pt;
+    line-height: 1.75;
+    margin-bottom: 6px;
+  }
+
+  .oath-block {
+    margin-top: 28px;
+    padding: 14px 18px;
+    background: #f8f6f1;
+    border: 1px solid #d8d0bc;
+    font-size: 10pt;
+    line-height: 1.7;
+    break-inside: avoid;
+  }
+
+  /* ── Signature blocks ── */
+  .signature-block {
+    margin-top: 40px;
+    font-size: 10.5pt;
+    line-height: 1.9;
+    break-inside: avoid;
+  }
+
+  .sig-line {
+    margin-top: 36px;
+    border-top: 1px solid #555;
+    width: 260px;
+    padding-top: 4px;
+    font-size: 9.5pt;
+    color: #333;
+  }
+
+  .sig-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 40px;
+    margin-top: 32px;
+    break-inside: avoid;
+  }
+
+  .sig-grid-item .sig-line { width: 100%; }
+
+  /* ── Proof of service ── */
+  .service-field {
+    margin: 14px 0;
+    break-inside: avoid;
+  }
+
+  .service-field-label {
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 8pt;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: #0A1628;
+    margin-bottom: 4px;
+  }
+
+  .service-field-line {
+    border-bottom: 1px solid #555;
+    min-height: 26px;
+    margin-top: 2px;
+  }
+
+  /* ── Checklist ── */
+  .checklist-section {
+    margin: 20px 0;
+    break-inside: avoid;
+  }
+
+  .checklist-section-title {
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 8.5pt;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: #0A1628;
+    border-bottom: 2px solid #C89B3C;
+    padding-bottom: 4px;
+    margin-bottom: 10px;
+    break-after: avoid;
+  }
+
+  .checklist-item {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 8px;
+    font-size: 10pt;
+    line-height: 1.65;
+    break-inside: avoid;
+  }
+
+  .checklist-box {
+    width: 14px;
+    height: 14px;
+    border: 1.5px solid #0A1628;
+    flex-shrink: 0;
+    margin-top: 3px;
+  }
+
+  hr.divider {
+    border: none;
+    border-top: 1px solid #d8d0bc;
+    margin: 32px 0;
+  }
+
+  /* ── Disclaimer ── */
+  .disclaimer-box {
+    margin: 32px 0 20px;
+    padding: 14px 18px;
+    background: #f8f6f1;
+    border-left: 3px solid #C89B3C;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 8.5pt;
+    line-height: 1.65;
+    color: #555;
+    break-inside: avoid;
+  }
+
+  /* ── Filing instructions ── */
+  .filing-box {
+    margin: 20px 0 0;
+    padding: 18px 22px;
+    background: #f0f4f8;
+    border: 1px solid #c4d0dc;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 9.5pt;
+    line-height: 1.75;
+    color: #1a2a3a;
+    white-space: pre-line;
+  }
+
+  .filing-label {
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 7.5pt;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1.3px;
+    color: #0A1628;
+    border-bottom: 2px solid #C89B3C;
+    padding-bottom: 6px;
+    margin-bottom: 14px;
+    break-after: avoid;
+  }
+</style>
+</head>
+<body>
+
+  <div class="doc-header">
+    <div class="doc-header-logo">Eviction<span>Command</span></div>
+    <div class="doc-header-meta">Document Preparation Service<br>Attorney-Reviewed · County-Specific</div>
+  </div>
+
+  <div class="doc-footer">
+    <div class="doc-footer-brand">EvictionCommand.com</div>
+    <div class="doc-footer-contact">(888) 322-4034 · alex@evictioncommand.com</div>
+  </div>
+
+  <div class="doc-body">
+
+    <!-- ══ COVER SHEET ══ -->
+    <div class="cover-sheet">
+      <div class="cover-title">
+        <h1>{{ filing_package_label }}</h1>
+        <div class="subtitle">{{ statute_reference }}</div>
+      </div>
+
+      <div class="cover-meta">
+        <div class="cover-meta-row"><span class="cover-meta-label">Date Prepared:</span><span>{{ notice_date }}</span></div>
+        <div class="cover-meta-row"><span class="cover-meta-label">Landlord:</span><span>{{ landlord_name }}</span></div>
+        <div class="cover-meta-row"><span class="cover-meta-label">Tenant(s):</span><span>{% for name in tenant_names %}{{ name }}{% if not loop.last %}, {% endif %}{% endfor %}</span></div>
+        <div class="cover-meta-row"><span class="cover-meta-label">Property Address:</span><span>{{ property_address }}</span></div>
+        <div class="cover-meta-row"><span class="cover-meta-label">Filing County:</span><span>{{ county }} County, {{ state }}</span></div>
+        <div class="cover-meta-row"><span class="cover-meta-label">Reason for Eviction:</span><span>{{ reason_for_eviction }}</span></div>
+        {% if underlying_notice.total_amount_owed %}
+        <div class="cover-meta-row"><span class="cover-meta-label">Amount Owed:</span><span>{{ underlying_notice.total_amount_owed }}</span></div>
+        {% endif %}
+      </div>
+
+      <div class="doc-toc">
+        <div class="doc-toc-label">This Package Contains</div>
+        <ol>
+          <li>Underlying Eviction Notice — {{ underlying_notice.notice_type_label }}</li>
+          <li>{{ doc2_label }} (pre-populated template)</li>
+          <li>{{ doc3_label }} (blank template)</li>
+          <li>{{ court_descriptor }} Filing Checklist</li>
+        </ol>
+      </div>
+    </div>
+
+    <!-- ══ DOCUMENT 1 — UNDERLYING NOTICE ══ -->
+    <div class="doc-separator">
+      <div class="doc-separator-bar">Document 1 of 4 — Underlying Eviction Notice</div>
+
+      <div class="title-block">
+        <h2>{{ underlying_notice.notice_type_label }}</h2>
+        <div class="statute">{{ underlying_notice.statute_reference }}</div>
+      </div>
+
+      <div class="info-section">
+        <div class="info-label">Date of Notice</div>
+        <div class="info-row">{{ notice_date }}</div>
+      </div>
+
+      <div class="info-section">
+        <div class="info-label">Landlord</div>
+        <div class="info-row">{{ landlord_name }}<br>{{ landlord_address }}</div>
+      </div>
+
+      <div class="info-section">
+        <div class="info-label">Tenant(s)</div>
+        <div class="info-row">{% for name in tenant_names %}{{ name }}{% if not loop.last %}, {% endif %}{% endfor %}</div>
+      </div>
+
+      <div class="info-section">
+        <div class="info-label">Rental Property Address</div>
+        <div class="info-row">{{ property_address }}</div>
+      </div>
+
+      <div class="body-section">
+        {% for para in underlying_notice.body_paragraphs %}
+        <p class="body-para">{{ para }}</p>
+        {% endfor %}
+      </div>
+
+      {% if underlying_notice.total_amount_owed %}
+      <div class="amount-callout">
+        <div class="section-heading">Amount Due</div>
+        <div class="amount-total">{{ underlying_notice.total_amount_owed }}</div>
+        {% if underlying_notice.total_amount_words %}<div>({{ underlying_notice.total_amount_words }})</div>{% endif %}
+        {% if underlying_notice.itemized_charges %}
+        <table class="itemized-table">
+          {% for charge in underlying_notice.itemized_charges %}
+          <tr><td>{{ charge.description }}</td><td>{{ charge.amount }}</td></tr>
+          {% endfor %}
+        </table>
+        {% endif %}
+      </div>
+      {% endif %}
+
+      {% if underlying_notice.deadline_date %}
+      <div class="deadline-block">
+        <strong>Pay or Vacate Deadline: {{ underlying_notice.deadline_date }}</strong><br>
+        You must pay the full amount owed or vacate and surrender possession by the above date.
+        Weekends and legal holidays are excluded per Georgia law.
+      </div>
+      {% endif %}
+
+      {% if underlying_notice.violation_description %}
+      <div class="deadline-block">
+        <strong>Nature of Violation:</strong> {{ underlying_notice.violation_description }}
+      </div>
+      {% endif %}
+
+      <div class="signature-block">
+        Respectfully,<br><br>
+        {{ landlord_name }}<br>
+        {{ landlord_address }}
+        <div class="sig-line">Landlord / Authorized Agent Signature &amp; Date</div>
+      </div>
+    </div>
+
+    <!-- ══ DOCUMENT 2 — DISPOSSESSORY AFFIDAVIT ══ -->
+    <div class="doc-separator">
+      <div class="doc-separator-bar">Document 2 of 4 — {{ doc2_label }} (Pre-Populated Template)</div>
+
+      <div class="title-block">
+        <h2>{{ doc2_label }}</h2>
+        <div class="statute">{{ statute_reference }} · {{ court_descriptor }} · {{ county }} County, {{ state }}</div>
+      </div>
+
+      <div class="disclaimer-box" style="margin-top:0;">
+        <strong>NOTE:</strong> Many {{ state }} courts require their own official {{ doc2_label }} form.
+        This pre-populated template is for preparation only. Obtain and use your county's official court
+        form when filing. Bring this document to assist you in completing the official form.
+      </div>
+
+      <div class="affidavit-field">
+        <div class="affidavit-field-label">Court Name</div>
+        <div class="affidavit-field-value">{{ court_descriptor }} · {{ county }} County, {{ state }}</div>
+      </div>
+
+      <div class="affidavit-field">
+        <div class="affidavit-field-label">Case Number</div>
+        <div class="affidavit-field-value">&nbsp;</div>
+      </div>
+
+      <div class="affidavit-intro">
+        <p class="body-para">
+          Personally appeared before me, the undersigned officer authorized to administer oaths,
+          <strong>{{ landlord_name }}</strong> ("Affiant"), who, being duly sworn, deposes and states:
+        </p>
+      </div>
+
+      {% for para in affidavit.body_paragraphs %}
+      <p class="body-para">{{ para }}</p>
+      {% endfor %}
+
+      <div class="affidavit-field" style="margin-top:20px;">
+        <div class="affidavit-field-label">Grounds for Dispossession</div>
+      </div>
+      <ul class="grounds-list">
+        {% for ground in affidavit.grounds %}
+        <li>{{ ground }}</li>
+        {% endfor %}
+      </ul>
+
+      <div class="affidavit-field">
+        <div class="affidavit-field-label">Prior Demand for Possession</div>
+        <div class="affidavit-field-value">
+          Affiant made a demand for possession on {{ affidavit.prior_demand_date }}
+          by {{ affidavit.prior_demand_method }}.
+          The tenant(s) refused or failed to comply.
+        </div>
+      </div>
+
+      {% if affidavit.amount_owed %}
+      <div class="affidavit-field">
+        <div class="affidavit-field-label">Amount of Rent / Damages Claimed</div>
+        <div class="affidavit-field-value">{{ affidavit.amount_owed }}</div>
+      </div>
+      {% endif %}
+
+      <div class="oath-block">
+        Affiant prays this Court issue a Writ of Possession for the above-described premises and,
+        where applicable, enter a money judgment for the amount owed, plus court costs and such
+        other relief as the Court deems just and proper.<br><br>
+        Affiant swears that the foregoing statements are true and correct to the best of Affiant's
+        knowledge and belief, under penalty of perjury.
+      </div>
+
+      <div class="sig-grid">
+        <div class="sig-grid-item">
+          <div class="sig-line">Landlord / Agent Signature</div>
+          <div style="margin-top:8px; font-size:9.5pt; color:#333;">{{ landlord_name }}</div>
+        </div>
+        <div class="sig-grid-item">
+          <div class="sig-line">Sworn and subscribed before me this ___ day of _________, 20___</div>
+          <div style="margin-top:8px; font-size:9.5pt; color:#333;">Notary / Clerk / Magistrate Judge</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ DOCUMENT 3 — AFFIDAVIT OF SERVICE ══ -->
+    <div class="doc-separator">
+      <div class="doc-separator-bar">Document 3 of 4 — {{ doc3_label }} (Blank Template)</div>
+
+      <div class="title-block">
+        <h2>{{ doc3_label }}</h2>
+        <div class="statute">Proof of Service of Underlying Eviction Notice</div>
+      </div>
+
+      <div class="affidavit-intro">
+        <p class="body-para">
+          I, the undersigned, being duly sworn, state that I served the
+          <strong>{{ underlying_notice.notice_type_label }}</strong>
+          on the tenant(s) named below as follows:
+        </p>
+      </div>
+
+      <div class="service-field">
+        <div class="service-field-label">Tenant(s) Served</div>
+        <div class="service-field-line">{% for name in tenant_names %}{{ name }}{% if not loop.last %}, {% endif %}{% endfor %}</div>
+      </div>
+
+      <div class="service-field">
+        <div class="service-field-label">Property Address Served</div>
+        <div class="service-field-line">{{ property_address }}</div>
+      </div>
+
+      <div class="service-field">
+        <div class="service-field-label">Date of Service</div>
+        <div class="service-field-line">&nbsp;</div>
+      </div>
+
+      <div class="service-field">
+        <div class="service-field-label">Time of Service</div>
+        <div class="service-field-line">&nbsp;</div>
+      </div>
+
+      <div class="service-field">
+        <div class="service-field-label">Method of Service (check all that apply)</div>
+        <div style="margin-top:8px; font-size:10pt; line-height:2;">
+          ☐ &nbsp; Posted sealed envelope conspicuously on front door<br>
+          ☐ &nbsp; Certified Mail (USPS) — Tracking #: ____________________________<br>
+          ☐ &nbsp; First-Class Mail<br>
+          ☐ &nbsp; Personal delivery to tenant<br>
+          ☐ &nbsp; Other: __________________________________________________
+        </div>
+      </div>
+
+      <div class="service-field">
+        <div class="service-field-label">Description of How Service Was Accomplished</div>
+        <div class="service-field-line">&nbsp;</div>
+        <div class="service-field-line" style="margin-top:8px;">&nbsp;</div>
+        <div class="service-field-line" style="margin-top:8px;">&nbsp;</div>
+      </div>
+
+      <div class="sig-grid" style="margin-top:40px;">
+        <div class="sig-grid-item">
+          <div class="sig-line">Person Who Served the Notice (Signature)</div>
+          <div style="margin-top:8px; font-size:9.5pt; color:#333;">Print Name: ___________________________</div>
+        </div>
+        <div class="sig-grid-item">
+          <div class="sig-line">Sworn and subscribed before me this ___ day of _________, 20___</div>
+          <div style="margin-top:8px; font-size:9.5pt; color:#333;">Notary Public — My Commission Expires: ___________</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ DOCUMENT 4 — FILING CHECKLIST ══ -->
+    <div class="doc-separator">
+      <div class="doc-separator-bar">Document 4 of 4 — {{ court_descriptor }} Filing Checklist</div>
+
+      <div class="title-block">
+        <h2>Filing Checklist</h2>
+        <div class="statute">{{ county }} County {{ court_descriptor }} · Eviction Filing</div>
+      </div>
+
+      <div class="checklist-section">
+        <div class="checklist-section-title">Before You Go to the Courthouse</div>
+        <div class="checklist-item"><div class="checklist-box"></div><span>Confirm you have a copy of the signed, served underlying eviction notice (Document 1)</span></div>
+        <div class="checklist-item"><div class="checklist-box"></div><span>Complete the {{ doc3_label }} (Document 3) and have it notarized</span></div>
+        <div class="checklist-item"><div class="checklist-box"></div><span>Have {{ doc2_label }} (Document 2) signed in front of a notary, court clerk, or judge</span></div>
+        <div class="checklist-item"><div class="checklist-box"></div><span>Gather your lease agreement (original or copy)</span></div>
+        <div class="checklist-item"><div class="checklist-box"></div><span>Gather proof of unpaid rent or lease violation (payment history, bank records, photos, written communications)</span></div>
+        <div class="checklist-item"><div class="checklist-box"></div><span>Call the {{ county }} County {{ court_descriptor }} to confirm current filing fees before going</span></div>
+      </div>
+
+      <div class="checklist-section">
+        <div class="checklist-section-title">At the Courthouse</div>
+        <div class="checklist-item"><div class="checklist-box"></div><span>File {{ doc2_label }} with the {{ court_descriptor }} clerk</span></div>
+        <div class="checklist-item"><div class="checklist-box"></div><span>Pay the filing fee (typically $54–$150) plus Sheriff service fee (~$35 per named defendant)</span></div>
+        <div class="checklist-item"><div class="checklist-box"></div><span>Provide copies of all documents to the clerk as required</span></div>
+        <div class="checklist-item"><div class="checklist-box"></div><span>Obtain a case number and note the date of filing</span></div>
+      </div>
+
+      <div class="checklist-section">
+        <div class="checklist-section-title">After Filing</div>
+        <div class="checklist-item"><div class="checklist-box"></div><span>The court will issue a Summons — the Sheriff or Marshal will serve the tenant (you do NOT serve this)</span></div>
+        <div class="checklist-item"><div class="checklist-box"></div><span>Tenant has 7 calendar days from service to file an answer</span></div>
+        <div class="checklist-item"><div class="checklist-box"></div><span>Check with the court clerk on day 8 whether an answer was filed</span></div>
+      </div>
+
+      <div class="checklist-section">
+        <div class="checklist-section-title">If No Answer Filed (Default)</div>
+        <div class="checklist-item"><div class="checklist-box"></div><span>File Application for Default Writ of Possession on day 8 or later</span></div>
+        <div class="checklist-item"><div class="checklist-box"></div><span>Court will schedule issuance of the Writ of Possession</span></div>
+      </div>
+
+      <div class="checklist-section">
+        <div class="checklist-section-title">If Tenant Files an Answer (Contested)</div>
+        <div class="checklist-item"><div class="checklist-box"></div><span>Court will schedule a hearing (typically 10–30 days out)</span></div>
+        <div class="checklist-item"><div class="checklist-box"></div><span>Bring all documentation to the hearing</span></div>
+        <div class="checklist-item"><div class="checklist-box"></div><span>Present your case to the magistrate judge</span></div>
+      </div>
+
+      <div class="checklist-section">
+        <div class="checklist-section-title">After Judgment in Your Favor</div>
+        <div class="checklist-item"><div class="checklist-box"></div><span>Court issues Writ of Possession (typically 7 days after judgment)</span></div>
+        <div class="checklist-item"><div class="checklist-box"></div><span>Deliver the Writ to the {{ county }} County Sheriff's or Marshal's office</span></div>
+        <div class="checklist-item"><div class="checklist-box"></div><span>Sheriff will execute the eviction — do NOT attempt to remove the tenant yourself</span></div>
+        <div class="checklist-item"><div class="checklist-box"></div><span>Do NOT change locks, shut off utilities, or remove tenant property before Sheriff executes the Writ</span></div>
+      </div>
+
+      <div class="disclaimer-box">
+        <strong>IMPORTANT:</strong> Self-help eviction (changing locks, removing property, shutting off utilities before Sheriff execution)
+        is illegal and may result in significant civil liability. Do not attempt it.
+      </div>
+
+      <hr class="divider">
+
+      <!-- Filing instructions (county-specific, from LLM) -->
+      <div class="filing-box">
+        <div class="filing-label">County-Specific Filing Instructions</div>
+        {{ filing_instructions }}
+      </div>
+
+      <hr class="divider">
+
+      <!-- Package disclaimer -->
+      <div class="disclaimer-box">
+        <strong>IMPORTANT NOTICE:</strong> This document package was prepared by Eviction Command, a document
+        preparation service only. Eviction Command is not a law firm and does not provide legal advice.
+        This package should be reviewed by a licensed attorney before filing. Eviction Command is not
+        responsible for errors resulting from inaccurate information provided by the client.
+        The {{ doc2_label }} included in this package is a preparation template only —
+        obtain and use your county's official court form when filing.
+      </div>
+    </div>
+
+  </div>
+
+</body>
+</html>

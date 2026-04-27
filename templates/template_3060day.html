@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<style>
+  @page { size: letter; margin: 0; }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: 11pt;
+    line-height: 1.85;
+    color: #1a1a1a;
+    background: #fff;
+    orphans: 3;
+    widows: 3;
+  }
+
+  .doc-header {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    height: 60px;
+    background: #0A1628;
+    border-bottom: 3px solid #C89B3C;
+    padding: 0 56px;
+    overflow: hidden;
+  }
+
+  .doc-header-logo {
+    float: left;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 15.5pt;
+    font-weight: 700;
+    color: #fff;
+    line-height: 60px;
+    letter-spacing: 0.2px;
+  }
+
+  .doc-header-logo span { color: #C89B3C; }
+
+  .doc-header-meta {
+    float: right;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 7pt;
+    color: rgba(255,255,255,0.4);
+    text-transform: uppercase;
+    letter-spacing: 0.9px;
+    line-height: 1.55;
+    text-align: right;
+    padding-top: 13px;
+  }
+
+  .doc-footer {
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    height: 40px;
+    background: #0A1628;
+    border-top: 2px solid #C89B3C;
+    padding: 0 56px;
+    overflow: hidden;
+  }
+
+  .doc-footer-brand {
+    float: left;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 8.5pt;
+    font-weight: 700;
+    color: #C89B3C;
+    line-height: 40px;
+  }
+
+  .doc-footer-contact {
+    float: right;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 8pt;
+    color: rgba(255,255,255,0.4);
+    line-height: 40px;
+  }
+
+  .doc-body {
+    padding: 80px 56px 80px;
+  }
+
+  /* ── Title block ── */
+  .title-block {
+    text-align: center;
+    margin-bottom: 28px;
+    break-inside: avoid;
+  }
+
+  .title-block h1 {
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: 13pt;
+    font-weight: 700;
+    color: #0A1628;
+    letter-spacing: 0.3px;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+  }
+
+  .title-block .statute {
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 9pt;
+    color: #555;
+  }
+
+  /* ── Notice type badge ── */
+  .notice-badge {
+    display: inline-block;
+    margin-top: 8px;
+    padding: 3px 12px;
+    background: #0A1628;
+    color: #C89B3C;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 7.5pt;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+  }
+
+  /* ── Info blocks ── */
+  .info-section {
+    margin: 22px 0;
+    break-inside: avoid;
+  }
+
+  .info-label {
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 7.5pt;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1.1px;
+    color: #0A1628;
+    border-bottom: 1px solid #d8d0bc;
+    padding-bottom: 3px;
+    margin-bottom: 8px;
+  }
+
+  .info-row {
+    font-size: 10.5pt;
+    line-height: 1.7;
+  }
+
+  /* ── Body paragraphs ── */
+  .body-section {
+    margin: 28px 0;
+  }
+
+  .body-para {
+    font-size: 11pt;
+    line-height: 1.85;
+    margin-bottom: 16px;
+    text-align: justify;
+    break-inside: avoid;
+  }
+
+  /* ── Move-out deadline ── */
+  .deadline-block {
+    margin: 28px 0;
+    padding: 18px 22px;
+    background: #0A1628;
+    color: #fff;
+    break-inside: avoid;
+  }
+
+  .deadline-block .deadline-label {
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 7.5pt;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1.3px;
+    color: #C89B3C;
+    margin-bottom: 8px;
+  }
+
+  .deadline-block .deadline-date {
+    font-size: 14pt;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+  }
+
+  .deadline-block .deadline-note {
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 8.5pt;
+    color: rgba(255,255,255,0.65);
+    margin-top: 6px;
+    line-height: 1.5;
+  }
+
+  /* ── Signature block ── */
+  .signature-block {
+    margin-top: 40px;
+    font-size: 10.5pt;
+    line-height: 1.9;
+    break-inside: avoid;
+  }
+
+  .sig-line {
+    margin-top: 36px;
+    border-top: 1px solid #555;
+    width: 260px;
+    padding-top: 4px;
+    font-size: 9.5pt;
+    color: #333;
+  }
+
+  hr.divider {
+    border: none;
+    border-top: 1px solid #d8d0bc;
+    margin: 32px 0;
+  }
+
+  /* ── Disclaimer ── */
+  .disclaimer-box {
+    margin: 32px 0 20px;
+    padding: 14px 18px;
+    background: #f8f6f1;
+    border-left: 3px solid #C89B3C;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 8.5pt;
+    line-height: 1.65;
+    color: #555;
+    break-inside: avoid;
+  }
+
+  /* ── Serving instructions ── */
+  .serving-box {
+    margin: 20px 0 0;
+    padding: 18px 22px;
+    background: #f0f4f8;
+    border: 1px solid #c4d0dc;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 9.5pt;
+    line-height: 1.75;
+    color: #1a2a3a;
+    white-space: pre-line;
+  }
+
+  .serving-label {
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 7.5pt;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1.3px;
+    color: #0A1628;
+    border-bottom: 2px solid #C89B3C;
+    padding-bottom: 6px;
+    margin-bottom: 14px;
+    break-after: avoid;
+  }
+</style>
+</head>
+<body>
+
+  <div class="doc-header">
+    <div class="doc-header-logo">Eviction<span>Command</span></div>
+    <div class="doc-header-meta">Document Preparation Service<br>Attorney-Reviewed · County-Specific</div>
+  </div>
+
+  <div class="doc-footer">
+    <div class="doc-footer-brand">EvictionCommand.com</div>
+    <div class="doc-footer-contact">(888) 322-4034 · alex@evictioncommand.com</div>
+  </div>
+
+  <div class="doc-body">
+
+    <!-- Title -->
+    <div class="title-block">
+      <h1>{{ notice_type_label }}</h1>
+      <div class="statute">{{ statute_reference }}</div>
+      <div class="notice-badge">
+        {% if is_month_to_month %}Month-to-Month Tenancy Termination{% else %}End of Lease / Holdover Tenant{% endif %}
+      </div>
+    </div>
+
+    <!-- Date -->
+    <div class="info-section">
+      <div class="info-label">Date of Notice</div>
+      <div class="info-row">{{ notice_date }}</div>
+    </div>
+
+    <!-- Landlord -->
+    <div class="info-section">
+      <div class="info-label">Landlord</div>
+      <div class="info-row">
+        {{ landlord_name }}<br>
+        {{ landlord_address }}
+      </div>
+    </div>
+
+    <!-- Tenant -->
+    <div class="info-section">
+      <div class="info-label">Tenant(s)</div>
+      <div class="info-row">
+        {% for name in tenant_names %}{{ name }}{% if not loop.last %}, {% endif %}{% endfor %}
+      </div>
+    </div>
+
+    <!-- Property -->
+    <div class="info-section">
+      <div class="info-label">Rental Property Address</div>
+      <div class="info-row">{{ property_address }}</div>
+    </div>
+
+    <!-- Body paragraphs -->
+    <div class="body-section">
+      {% for para in body_paragraphs %}
+      <p class="body-para">{{ para }}</p>
+      {% endfor %}
+    </div>
+
+    <!-- Move-out deadline -->
+    <div class="deadline-block">
+      <div class="deadline-label">Required Move-Out Date</div>
+      <div class="deadline-date">{{ move_out_date }}</div>
+      <div class="deadline-note">
+        {% if is_month_to_month %}
+        Sixty (60) calendar days from the date of this notice. Weekends and holidays are included in the count.
+        {% else %}
+        Per the terms of your lease agreement. You must vacate and surrender possession on or before this date.
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Signature -->
+    <div class="signature-block">
+      Respectfully,<br><br>
+      {{ landlord_name }}<br>
+      {{ landlord_address }}
+      <div class="sig-line">Landlord / Authorized Agent Signature &amp; Date</div>
+    </div>
+
+    <hr class="divider">
+
+    <!-- Disclaimer -->
+    <div class="disclaimer-box">
+      <strong>IMPORTANT NOTICE:</strong> This document was prepared by Eviction Command, a document
+      preparation service only. Eviction Command is not a law firm and does not provide legal advice.
+      This document should be reviewed by a licensed attorney before serving. Eviction Command is not
+      responsible for errors resulting from inaccurate information provided by the client.
+    </div>
+
+    <!-- Serving instructions -->
+    <div class="serving-box">
+      <div class="serving-label">Serving Instructions</div>
+      {{ serving_instructions }}
+    </div>
+
+  </div>
+
+</body>
+</html>

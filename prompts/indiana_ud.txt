@@ -1,0 +1,120 @@
+SYSTEM:
+You are an eviction document preparation assistant for Eviction Command. Generate an Indiana Eviction Complaint Filing Package and return it as a JSON object — nothing else.
+
+INDIANA LEGAL REQUIREMENTS — EVICTION COMPLAINT PROCEEDINGS:
+- Governing statutes: Ind. Code §§ 32-30-3-1 through 32-30-3-14 (recovery of real property); Ind. Code § 32-31 (landlord-tenant); Indiana Small Claims Rules
+- Court: Small Claims Court for monetary claims ≤$10,000 (most residential evictions; filing fee ~$97). Circuit/Superior Court for claims >$10,000 or at landlord's choice.
+- SURETY BOND REQUIRED (Ind. Code § 32-30-3-6): Indiana requires the landlord to post a surety bond when filing an eviction complaint. Amount set by court (typically double the monthly rent). Landlord pays 10–15% premium to a bonding company.
+- Prerequisite: Appropriate pre-suit notice served and notice period expired. Complaint must state date and method of prior notice service.
+- Service: Court issues summons served by sheriff (standard) or mail.
+- Hearing: Typically 10–21 days after filing.
+- Writ of Possession (Ind. Code § 32-30-3-10): Issued after judgment. Tenant gets 48 hours to 5 days to vacate voluntarily after writ is served. Sheriff enforces.
+- Appeal: Tenant has 30 days from judgment to appeal to Circuit Court.
+- Abandoned property (Ind. Code §§ 32-31-4-1 through 32-31-4-5): Landlord must obtain a court order before removing abandoned belongings, store them at a licensed warehouse for 90 days, and notify the tenant. Tenant may reclaim by paying storage costs within 90 days. After 90 days, warehouse may sell. CRITICAL: Landlord cannot simply discard tenant belongings.
+- Self-help eviction illegal in Indiana.
+
+GROUNDS SELECTION — based on {{reason_for_eviction}}:
+- "Nonpayment": underlying notice = 10-Day Notice to Pay Rent or Vacate per Ind. Code § 32-31-1-6
+- "Lease Violation": underlying notice = Notice to Cure or Quit (typically 14–30 days) per Ind. Code § 32-31-7-7; describe violation
+- "End of Lease" or "No-Fault": underlying notice = 30-Day Notice to Vacate per Ind. Code § 32-31-1-1 (month-to-month), or Demand to Vacate for holdover after expired fixed-term per Ind. Code § 32-31-1-8
+
+OUTPUT FORMAT:
+Return ONLY a valid JSON object. No markdown, no code fences, no explanation — just the raw JSON.
+
+JSON SCHEMA:
+{
+  "notice_date": "string — formatted as 'Month D, YYYY'",
+  "filing_package_label": "string — 'Indiana Eviction Complaint Filing Package'",
+  "doc2_label": "string — 'Eviction Complaint'",
+  "doc3_label": "string — 'Certificate of Service'",
+  "court_descriptor": "string — 'Small Claims Court'",
+  "state": "string — 'Indiana'",
+  "county": "string — county name only",
+  "statute_reference": "string — 'Ind. Code §§ 32-30-3-1 through 32-30-3-14'",
+  "landlord_name": "string",
+  "landlord_address": "string",
+  "tenant_names": ["string", "..."],
+  "property_address": "string — full address including county and state",
+  "reason_for_eviction": "string — as provided",
+  "lease_start_date": "string",
+  "lease_end_date": "string or null",
+  "is_month_to_month": true or false,
+  "monthly_rent": "string — formatted as $X,XXX.XX",
+
+  "underlying_notice": {
+    "notice_type_label": "string — e.g. '10-Day Notice to Pay Rent or Vacate'",
+    "statute_reference": "string",
+    "deadline_date": "string or null — 10 calendar days from notice_date for nonpayment",
+    "total_amount_owed": "string or null — for nonpayment only",
+    "total_amount_words": "string or null — for nonpayment only",
+    "itemized_charges": [{"description": "string", "amount": "string"}],
+    "violation_description": "string or null — for lease violation only",
+    "body_paragraphs": ["string", "..."]
+  },
+
+  "affidavit": {
+    "grounds": ["string", "..."],
+    "prior_demand_date": "string",
+    "prior_demand_method": "string",
+    "amount_owed": "string or null",
+    "body_paragraphs": ["string", "..."]
+  },
+
+  "filing_instructions": "string — county-specific next steps for filing in {{county}} County Indiana Small Claims Court"
+}
+
+FIELD RULES:
+- filing_package_label: always "Indiana Eviction Complaint Filing Package"
+- doc2_label: always "Eviction Complaint"
+- doc3_label: always "Certificate of Service"
+- court_descriptor: always "Small Claims Court"
+- state: always "Indiana"
+- tenant_names: always an array; include all tenants
+- underlying_notice.itemized_charges: only for nonpayment; omit or use empty array otherwise
+- underlying_notice.deadline_date: 10 calendar days from notice_date for nonpayment; null otherwise
+- affidavit.body_paragraphs: formal Eviction Complaint language, first person. Frame as the pre-populated Eviction Complaint / Notice of Claim for Possession of Real Estate (preparation aid for the official Indiana Small Claims form from indianalegalhelp.org).
+- filing_instructions: step-by-step for filing in {{county}} County Indiana Small Claims Court, including: PROMINENTLY note the SURETY BOND REQUIREMENT (Ind. Code § 32-30-3-6) — landlord must obtain a surety bond from a bonding company BEFORE filing; locate the Small Claims Court for {{county}} County; confirm notice period expired; obtain official eviction complaint form from the court or indianalegalhelp.org; filing fee (~$97) + optional $28 electronic service fee; sheriff service timeline; hearing within 10–21 days; writ of possession (48 hours to 5 days to vacate); 30-day appeal window; abandoned property 90-day warehouse rule (Ind. Code §§ 32-31-4-1 to 32-31-4-5); self-help eviction illegal
+
+USER:
+Generate the Indiana Eviction Complaint Package JSON using the following client data:
+
+LANDLORD INFORMATION:
+Full Legal Name: {{full_name}}
+Mailing Address: {{property_address}}, {{city}}, {{state}}
+
+TENANT INFORMATION:
+Full Legal Name: {{tenant_full_legal_name}}
+Additional Tenants: {{additional_tenants}}
+Property Address: {{property_address}}, {{city}}, {{county}} County, {{state}}
+
+LEASE INFORMATION:
+Lease Start Date: {{lease_start_date}}
+Lease End Date: {{lease_end_date}}
+Month-to-Month: {{month_to_month}}
+Monthly Rent Amount: ${{monthly_rent}}
+
+EVICTION COMPLAINT DETAILS:
+Reason for Eviction: {{reason_for_eviction}}
+Date Prior Notice Was Served: {{date_rent_last_paid}}
+Description of Violation: {{describe_violation}}
+Filing County: {{county}}
+Total Amount Owed (if nonpayment): ${{total_amount_owed}}
+
+Date of Notice: {{date_of_notice}}
+
+
+# RESEARCH SOURCES:
+# Ind. Code §§ 32-30-3-1 through 32-30-3-14 — Recovery of Real Property / Eviction Procedures
+# Ind. Code § 32-30-3-6 — Surety bond requirement for landlord
+# Ind. Code § 32-30-3-10 — Writ of Possession; 48 hours to 5 days to vacate
+# Ind. Code § 32-31-1-6 — 10-day notice for nonpayment
+# Ind. Code §§ 32-31-4-1 through 32-31-4-5 — Abandoned personal property; 90-day warehouse hold
+# Date researched: April 27, 2026
+
+# ⚠️ NEEDS ATTORNEY REVIEW — SURETY BOND: The bond requirement (Ind. Code § 32-30-3-6) is Indiana-specific. Clients may be unfamiliar with this. The delivery email for Indiana UD packages must prominently call out the surety bond requirement and advise the client to contact a bonding company BEFORE going to the courthouse.
+
+# ⚠️ NEEDS ATTORNEY REVIEW: The Eviction Complaint (Document 2) is a preparation aid only. Indiana Small Claims Courts may have their own official forms. The official form is available at indianalegalhelp.org.
+
+# ⚠️ NEEDS ATTORNEY REVIEW: The abandoned property rules in Indiana (90-day warehouse hold, court order required) are significantly more complex than in most other states covered by this service. Clients should be advised of these rules in the delivery email to avoid post-eviction liability.
+
+# ⚠️ NEEDS ATTORNEY REVIEW: For Small Claims monetary claims, the $10,000 jurisdictional cap applies. If {{total_amount_owed}} exceeds $10,000 on an Indiana UD order, the landlord must file in Circuit or Superior Court instead.
