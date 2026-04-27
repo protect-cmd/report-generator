@@ -69,7 +69,7 @@ def generate_pdf(document_text: str, output_path: str) -> str:
   /* ── Page setup — margins reserve space for fixed header + footer ── */
   @page {{
     size: letter;
-    margin: 72px 0 52px 0;
+    margin: 0;
   }}
 
   * {{ box-sizing: border-box; margin: 0; padding: 0; }}
@@ -147,7 +147,7 @@ def generate_pdf(document_text: str, output_path: str) -> str:
 
   /* ── Main document body ── */
   .doc-body {{
-    padding: 44px 56px 36px;
+    padding: 80px 56px 60px;
     white-space: pre-line;
   }}
 
