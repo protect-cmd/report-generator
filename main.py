@@ -13,7 +13,7 @@ from models.deliver_request import DeliverRequest
 from models.intake_form import IntakeForm
 from services.drive_service import build_drive_service, create_client_folder, download_pdf, file_id_from_url, get_shareable_url, upload_pdf
 from services.email_service import send_client_delivery
-from services.ghl_service import add_contact_note, get_opportunity_id, move_opportunity_stage, update_contact_custom_field
+from services.ghl_service import add_contact_note, add_contact_tag, update_contact_custom_field
 from services.llm_service import generate_document
 from services.pdf_service import generate_pdf
 from utils.prompt_loader import load_prompt
@@ -85,15 +85,11 @@ async def generate(form: IntakeForm):
     except Exception:
         logger.warning("GHL custom field update failed:\n%s", traceback.format_exc())
 
-    # 6. Notify GHL — log warning and continue on failure (document is in Drive)
-    stage_id = os.environ.get("GHL_PENDING_REVIEW_STAGE_ID")
-    location_id = os.environ.get("GHL_LOCATION_ID")
-
+    # 6. Tag contact → GHL workflow moves opportunity to Pending Review
     try:
-        opportunity_id = get_opportunity_id(ghl_api_key, form.contact_id, location_id)
-        move_opportunity_stage(ghl_api_key, opportunity_id, stage_id)
+        add_contact_tag(ghl_api_key, form.contact_id, "doc-generated")
     except Exception:
-        logger.warning("GHL stage move failed:\n%s", traceback.format_exc())
+        logger.warning("GHL tag failed:\n%s", traceback.format_exc())
 
     try:
         add_contact_note(ghl_api_key, form.contact_id, drive_url, form.notice_type, form.state, form.county)

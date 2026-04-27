@@ -13,29 +13,10 @@ def _auth_headers(api_key: str) -> dict:
 
 
 
-def get_opportunity_id(api_key: str, contact_id: str, location_id: str) -> str:
-    url = f"{GHL_BASE_URL}/opportunities/search"
-    params = {"contact_id": contact_id, "location_id": location_id}
-    response = httpx.get(url, headers=_auth_headers(api_key), params=params, timeout=GHL_TIMEOUT_SECONDS)
+def add_contact_tag(api_key: str, contact_id: str, tag: str) -> None:
+    url = f"{GHL_BASE_URL}/contacts/{contact_id}/tags"
+    response = httpx.post(url, headers=_auth_headers(api_key), json={"tags": [tag]}, timeout=GHL_TIMEOUT_SECONDS)
     response.raise_for_status()
-    opportunities = response.json().get("opportunities", [])
-    if not opportunities:
-        raise ValueError(f"No opportunity found for contact {contact_id}")
-    return opportunities[0]["id"]
-
-
-def move_opportunity_stage(api_key: str, opportunity_id: str, stage_id: str) -> None:
-    url = f"{GHL_BASE_URL}/opportunities/{opportunity_id}"
-    response = httpx.put(
-        url,
-        headers=_auth_headers(api_key),
-        json={"stageId": stage_id},
-        timeout=GHL_TIMEOUT_SECONDS,
-    )
-    if not response.is_success:
-        import logging
-        logging.getLogger(__name__).error("GHL stage move — status=%s body=%s", response.status_code, response.text)
-        raise ValueError(f"GHL {response.status_code}")
 
 
 def update_contact_custom_field(api_key: str, contact_id: str, field_key: str, value: str) -> None:
