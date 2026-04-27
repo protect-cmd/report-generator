@@ -26,12 +26,14 @@ def get_opportunity_id(api_key: str, contact_id: str, location_id: str) -> str:
 
 def move_opportunity_stage(api_key: str, opportunity_id: str, stage_id: str, pipeline_id: str | None = None) -> None:
     url = f"{GHL_BASE_URL}/opportunities/{opportunity_id}"
-    body = {"stageId": stage_id}
+    body = {"pipelineStageId": stage_id}
     if pipeline_id:
         body["pipelineId"] = pipeline_id
     response = httpx.put(url, headers=_auth_headers(api_key), json=body, timeout=GHL_TIMEOUT_SECONDS)
     if not response.is_success:
-        raise ValueError(f"GHL {response.status_code} — body: {response.text}")
+        import logging
+        logging.getLogger(__name__).error("GHL opportunity update %s — status=%s body=%s", opportunity_id, response.status_code, response.text)
+        raise ValueError(f"GHL {response.status_code}")
 
 
 def update_contact_custom_field(api_key: str, contact_id: str, field_key: str, value: str) -> None:
