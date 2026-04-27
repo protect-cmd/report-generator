@@ -24,9 +24,12 @@ def get_opportunity_id(api_key: str, contact_id: str, location_id: str) -> str:
     return opportunities[0]["id"]
 
 
-def move_opportunity_stage(api_key: str, opportunity_id: str, stage_id: str) -> None:
+def move_opportunity_stage(api_key: str, opportunity_id: str, stage_id: str, pipeline_id: str | None = None) -> None:
     url = f"{GHL_BASE_URL}/opportunities/{opportunity_id}"
-    response = httpx.put(url, headers=_auth_headers(api_key), json={"stageId": stage_id}, timeout=GHL_TIMEOUT_SECONDS)
+    body = {"stageId": stage_id}
+    if pipeline_id:
+        body["pipelineId"] = pipeline_id
+    response = httpx.put(url, headers=_auth_headers(api_key), json=body, timeout=GHL_TIMEOUT_SECONDS)
     response.raise_for_status()
 
 

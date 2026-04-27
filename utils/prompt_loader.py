@@ -14,6 +14,7 @@ NOTICE_TYPE_MAP = {
     "3-Day Pay or Quit": "3day",
     "30-Day Notice": "3060day",
     "60-Day Notice": "3060day",
+    "30/60-Day Notice to Vacate": "3060day",
     "Full UD Package": "ud",
 }
 

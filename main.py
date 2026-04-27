@@ -98,7 +98,8 @@ async def generate(form: IntakeForm):
 
     if opportunity_id:
         try:
-            move_opportunity_stage(ghl_api_key, opportunity_id, stage_id)
+            pipeline_id = os.environ.get("GHL_PIPELINE_ID")
+            move_opportunity_stage(ghl_api_key, opportunity_id, stage_id, pipeline_id)
         except Exception:
             logger.warning("GHL stage move failed:\n%s", traceback.format_exc())
     else:
