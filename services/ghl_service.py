@@ -29,7 +29,7 @@ def move_opportunity_stage(api_key: str, opportunity_id: str, stage_id: str) -> 
     response = httpx.put(
         url,
         headers=_auth_headers(api_key),
-        json={"pipelineStageId": stage_id},
+        json={"stageId": stage_id},
         timeout=GHL_TIMEOUT_SECONDS,
     )
     if not response.is_success:
