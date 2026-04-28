@@ -45,8 +45,8 @@ async def generate(form: IntakeForm):
         raise HTTPException(status_code=500, detail="Document generation failed")
 
     # 3. Convert to PDF — 500 if fails
-    from utils.prompt_loader import NOTICE_TYPE_MAP  # noqa: PLC0415
-    notice_key = NOTICE_TYPE_MAP.get(form.notice_type, "3day")
+    from utils.prompt_loader import _resolve_notice_type  # noqa: PLC0415
+    notice_key = _resolve_notice_type(form.notice_type) or "3day"
     pdf_path = None
     try:
         with tempfile.NamedTemporaryFile(suffix=".pdf", delete=False) as tmp:
