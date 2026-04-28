@@ -5,7 +5,7 @@
 <style>
   @page {
     size: letter;
-    margin: 80px 0;
+    margin: 0;
   }
 
   * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -82,7 +82,7 @@
   }
 
   .doc-body {
-    padding: 0 56px;
+    padding: 80px 56px 80px;
   }
 
   /* ── Title block ── */
@@ -143,8 +143,6 @@
     line-height: 1.85;
     margin-bottom: 16px;
     text-align: justify;
-    break-inside: avoid;
-    page-break-inside: avoid;
   }
 
   /* ── Amount callout ── */
@@ -274,6 +272,26 @@
     color: #555;
     break-inside: avoid;
     page-break-inside: avoid;
+  }
+
+  /* ── PDF-specific fixes ── */
+  @media print {
+    @page {
+      margin: 80px 0 60px 0;
+      @top-center { content: element(header); }
+      @bottom-center { content: element(footer); }
+    }
+    .doc-header {
+      position: running(header);
+      width: 100%;
+    }
+    .doc-footer {
+      position: running(footer);
+      width: 100%;
+    }
+    .doc-body {
+      padding: 0 56px;
+    }
   }
 </style>
 </head>

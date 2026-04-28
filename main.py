@@ -12,7 +12,7 @@ from fastapi.responses import JSONResponse
 from models.deliver_request import DeliverRequest
 from models.intake_form import IntakeForm
 from services.drive_service import build_drive_service, create_client_folder, download_pdf, file_id_from_url, get_shareable_url, upload_pdf
-from services.email_service import send_client_delivery
+from services.email_service import send_client_delivery, send_sunshine_notification
 from services.ghl_service import add_contact_note, add_contact_tag, update_contact_custom_field
 from services.llm_service import generate_document
 from services.pdf_service import generate_pdf
@@ -96,11 +96,30 @@ async def generate(form: IntakeForm):
     except Exception:
         logger.warning("GHL note failed:\n%s", traceback.format_exc())
 
+    # 7. Notify Sunshine + admin for review
+    try:
+        send_sunshine_notification(
+            drive_url=drive_url,
+            notice_type=form.notice_type,
+            state=form.state,
+            tenant_name=form.tenant_full_legal_name,
+            contact_id=form.contact_id,
+        )
+    except Exception:
+        logger.warning("Sunshine notification failed:\n%s", traceback.format_exc())
+
     return JSONResponse({"status": "success", "drive_url": drive_url})
 
 
 @app.post("/deliver")
 async def deliver(req: DeliverRequest):
+    # Guard: GHL sends literal "null" when the custom field wasn't populated
+    if not req.drive_url or req.drive_url.strip().lower() in ("null", "none", ""):
+        raise HTTPException(
+            status_code=400,
+            detail="drive_url is missing — ensure the doc-approved workflow passes the drive_document_url field",
+        )
+
     # 1. Download PDF from Drive
     try:
         drive_service = build_drive_service()

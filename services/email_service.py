@@ -130,8 +130,12 @@ def send_client_delivery(
 </body>
 </html>"""
 
+    sunshine_email = os.environ.get("SUNSHINE_EMAIL", "")
+    admin_email = os.environ.get("ADMIN_EMAIL", "")
+    cc_addresses = [a for a in [sunshine_email, admin_email] if a]
+
     try:
-        resend.Emails.send({
+        payload = {
             "from": from_addr,
             "to": [client_email],
             "subject": f"Your Eviction Document Is Ready — {notice_type} for {property_address}",
@@ -139,8 +143,11 @@ def send_client_delivery(
             "attachments": [
                 {"filename": pdf_filename, "content": base64.b64encode(pdf_bytes).decode()}
             ],
-        })
-        logger.info("Client delivery email sent to %s", client_email)
+        }
+        if cc_addresses:
+            payload["cc"] = cc_addresses
+        resend.Emails.send(payload)
+        logger.info("Client delivery email sent to %s (cc: %s)", client_email, cc_addresses)
         return True
     except Exception as exc:
         logger.warning("Client delivery email failed: %s", exc)
