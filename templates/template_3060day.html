@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <style>
-  @page { size: letter; margin: 0; }
+  @page { size: letter; margin: 80px 0; }
 
   * { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -79,7 +79,7 @@
   }
 
   .doc-body {
-    padding: 80px 56px 80px;
+    padding: 0 56px;
   }
 
   /* ── Title block ── */
@@ -254,23 +254,13 @@
     break-after: avoid;
   }
 
-  /* ── PDF-specific fixes ── */
+  /* ── PDF Renderer Fixes ── */
   @media print {
-    @page {
-      margin: 80px 0 60px 0;
-      @top-center { content: element(header); }
-      @bottom-center { content: element(footer); }
-    }
     .doc-header {
-      position: running(header);
-      width: 100%;
+      top: -80px;
     }
     .doc-footer {
-      position: running(footer);
-      width: 100%;
-    }
-    .doc-body {
-      padding: 0 56px;
+      bottom: -80px;
     }
   }
 </style>

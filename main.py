@@ -104,6 +104,11 @@ async def generate(form: IntakeForm):
             state=form.state,
             tenant_name=form.tenant_full_legal_name,
             contact_id=form.contact_id,
+            landlord_name=form.full_name,
+            property_address=form.property_address,
+            county=form.county,
+            total_amount_owed=form.total_amount_owed,
+            reason_for_eviction=form.reason_for_eviction,
         )
     except Exception:
         logger.warning("Sunshine notification failed:\n%s", traceback.format_exc())

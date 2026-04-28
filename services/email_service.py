@@ -17,12 +17,30 @@ def send_sunshine_notification(
     state: str,
     tenant_name: str,
     contact_id: str,
+    landlord_name: str | None = None,
+    property_address: str | None = None,
+    county: str | None = None,
+    total_amount_owed: float | None = None,
+    reason_for_eviction: str | None = None,
 ) -> bool:
     """Email Sunshine an internal review link after Drive upload."""
     _get_client()
     from_addr = os.environ.get("RESEND_FROM_ADDRESS", "docs@evictioncommand.com")
     sunshine_email = os.environ["SUNSHINE_EMAIL"]
     admin_email = os.environ["ADMIN_EMAIL"]
+
+    location_id = os.environ.get("GHL_LOCATION_ID", "")
+    ghl_profile_url = (
+        f"https://app.gohighlevel.com/v2/location/{location_id}/contacts/detail/{contact_id}"
+        if location_id else None
+    )
+
+    county_display = f"{county} County, " if county else ""
+    amount_row = f"<li><strong>Amount owed:</strong> ${total_amount_owed:,.2f}</li>" if total_amount_owed else ""
+    reason_row = f"<li><strong>Reason:</strong> {reason_for_eviction}</li>" if reason_for_eviction else ""
+    landlord_row = f"<li><strong>Landlord:</strong> {landlord_name}</li>" if landlord_name else ""
+    address_row = f"<li><strong>Property:</strong> {property_address} &mdash; {county_display}{state.title()}</li>" if property_address else ""
+    profile_link = f"<p><a href='{ghl_profile_url}'>Open contact in GHL</a></p>" if ghl_profile_url else ""
 
     try:
         resend.Emails.send({
@@ -32,12 +50,15 @@ def send_sunshine_notification(
             "html": (
                 f"<p>A new eviction document is ready for review.</p>"
                 f"<ul>"
+                f"{landlord_row}"
                 f"<li><strong>Tenant:</strong> {tenant_name}</li>"
-                f"<li><strong>State:</strong> {state.title()}</li>"
+                f"{address_row}"
                 f"<li><strong>Notice type:</strong> {notice_type}</li>"
-                f"<li><strong>Contact ID:</strong> {contact_id}</li>"
+                f"{amount_row}"
+                f"{reason_row}"
                 f"</ul>"
                 f"<p><a href='{drive_url}'>Open document in Google Drive</a></p>"
+                f"{profile_link}"
                 f"<p>Approve by adding the <strong>doc-approved</strong> tag in GHL.</p>"
             ),
         })
